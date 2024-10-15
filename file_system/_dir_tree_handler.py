@@ -189,8 +189,8 @@ class DirTreeHandler:
                 pass
         self._current_dir = self._dir_tree
         self._current_dir_path = ['/']
-        self._old_dir = list(self._current_dir)
-        self._old_dir_path = list(self._current_dir_path)
+        self._old_dir = self._current_dir
+        self._old_dir_path = self._current_dir_path
         self.json_indent_zero = json_indent_zero
         self.json_sep_close = json_sep_close
 
@@ -203,8 +203,8 @@ class DirTreeHandler:
 
     def __save(self) -> None:
         """保存当前目录和当前路径；"""
-        self._old_dir = list(self._current_dir)
-        self._old_dir_path = list(self._current_dir_path)
+        self._old_dir = self._current_dir
+        self._old_dir_path = self._current_dir_path
 
     def __backward(self) -> None:
         """恢复当前目录和当前路径；
@@ -219,12 +219,12 @@ class DirTreeHandler:
               由于本模块要求self._current_dir、self._current_dir_path只能在“goto”方法和本方法调用前后改变，在其他方法调用前后不变，
               所以实际上要求其他方法（除了“goto”方法、_save方法、本方法和_set_state）在调用前后不改变这四个成员变量的值；
         """
-        self._current_dir = list(self._old_dir)
-        self._current_dir_path = list(self._old_dir_path)
+        self._current_dir = self._old_dir
+        self._current_dir_path = self._old_dir_path
 
     def __get_state(self) -> tuple:
         """获得当前状态的四元组；"""
-        return list(self._old_dir), list(self._old_dir_path), list(self._current_dir), list(self._current_dir_path)
+        return self._old_dir, self._old_dir_path, self._current_dir, self._current_dir_path
 
     def __set_state(self, state: tuple) -> None:
         """设置当前状态
@@ -270,7 +270,7 @@ class DirTreeHandler:
                     self.__backward()
                     return False
                 self._current_dir = self._current_dir[NoteIndex.content.value][item]
-                self._current_dir_path.append(item)
+                self._current_dir_path = self._current_dir_path + [item]
             else:
                 self.__backward()
                 return False
@@ -297,8 +297,8 @@ class DirTreeHandler:
             如果指定的路径不存在，则返回False；如果指定的路径存在并且是目录（不是目录），则返回NoteType.is_dir（NoteType.is_file）；特别的，如果path是空的，表示是当前目录，此时返回NoteType.is_dir；
         """
         self.__save()
-        old_dir_tmp = list(self._old_dir)  # 保存旧路径；
-        old_dir_path_tmp = list(self._old_dir_path)
+        old_dir_tmp = self._old_dir  # 保存旧路径；
+        old_dir_path_tmp = self._old_dir_path
 
         if not path:  # 对当前路径的处理；
             return NoteType.is_dir
@@ -411,12 +411,12 @@ class DirTreeHandler:
                 * 这里不保证原来的 self.__old_dir、self.__old_dir_path 不变；
             """
             # 保存当前路径；
-            current_dir_tmp = list(self._current_dir)
-            current_dir_path_tmp = list(self._current_dir_path)
+            current_dir_tmp = self._current_dir
+            current_dir_path_tmp = self._current_dir_path
 
             # 获得当前目录结点
             self.__goto_dir(path)
-            current_dir = list(self._current_dir)  # 这是重要的，因为在遍历子结点的时候”当前目录“被修改，如果直接使用self._current_dir会导致错误（也显得十分混乱）；
+            current_dir = self._current_dir  # 这是重要的，因为在遍历子结点的时候”当前目录“被修改，如果直接使用self._current_dir会导致错误（也显得十分混乱）；
             # 修改本目录的的最后修改时间
             current_dir[NoteIndex.metadata.value][MetadataIndex.last_modify_time.value] = current_time
             # 递归地修改子结点的最后修改时间
@@ -829,7 +829,7 @@ if __name__ == "__main__":
     # 注：如果要使用这个示例，请拷贝下面的代码，在外部的 python 文件中使用；
 
     # 使用推荐的with（上下文资源管理器）来“按顺序地深度优先”地创建这棵目录树；
-    with DirTreeHandler('test.json') as d:
+    with DirTreeHandler('test.json', json_indent_zero=False, json_sep_close=False) as d:
         d.mkdir(['SoftwareDevelopmentExperiment'])
         d.chdir(['SoftwareDevelopmentExperiment'])
         d.mkdir(['file_system_'])
