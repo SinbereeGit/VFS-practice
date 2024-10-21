@@ -567,7 +567,7 @@ class VirtualFileSystem:
         for item in contents:
             path_tmp = inner_path + [item]
             if not self._dir_tree_handler.is_dir(path_tmp):  # 如果是一个文件，将它复制到目录中；
-                self.__copy_file_to_outside(path_tmp, outer_path)
+                self.__copy_file_to_outside(path_tmp, os.path.join(outer_path,item))
             else:  # 如果是一个目录，递归调用自己；
                 self.__copy_dir_to_outside(path_tmp, os.path.join(outer_path, item))
 
@@ -708,7 +708,7 @@ class VirtualFileSystem:
             path_tmp = inner_path + [item]
             if not self._dir_tree_handler.is_dir(path_tmp):  # 如果是一个文件，且满足指定的后缀, 将它复制到目录中；
                 if path_tmp[-1].split('.')[-1].lower() in type_filter:
-                    self.__copy_file_to_outside(path_tmp, outer_path)
+                    self.__copy_file_to_outside(path_tmp, os.path.join(outer_path, item))
             else:  # 如果是一个目录，递归调用自己；
                 self.__copy_dir_to_outside_ex(path_tmp, os.path.join(outer_path, item), type_filter)
 
