@@ -462,7 +462,7 @@ class DirTreeHandler:
         """
         # 条件检查；
         state = self.__get_state()
-        if not path:  # 不能在当前路径创建结点
+        if not path:  # 不能创建路径为根路径的结点
             raise InvalidCurrentDirOperation(f"尝试创建路径为当前路径的结点，但这是不允许的")
         if not path[-1]:  # 待创建的结点名称不能是空的；
             raise InvalidNamingConvention("待创建结点的名称不能是空的")
@@ -652,19 +652,19 @@ class DirTreeHandler:
 
         Raises:
             InvalidOperation: 如果目标路径包含源路径；
-            InvalidCurrentDirOperation: 如果源路径或者目标路径是当前路径，或源路径包含当前路径；
+            InvalidCurrentDirOperation: 如果源路径或者目标路径是当前路径，或当前路径包含源路径；
             PathNotExists: 如果源路径不存在，或目标路径所在的目录不存在；
             InvalidNamingConvention: 如果待创建的结点的名称是空的或者其中包含‘/’；
         """
         # 条件检查；
         if self.__is_path_contained(dst_path, src_path):  # 如果目标路径包含源路径;
             raise InvalidOperation(f"在移动操作中，目标路径'{dst_path}'包含源路径'{src_path}'，这是不允许的")
-        if self.__is_path_contained(src_path, []):  # 如果源路径包含当前路径；
-            raise InvalidCurrentDirOperation(f"在移动操作中，源路径'{dst_path}'包含当前路径，这是不允许的")
+        if self.__is_path_contained([], src_path):  # 如果当前路径包含源路径；
+            raise InvalidCurrentDirOperation(f"在移动操作中，当前路径包含源路径'{dst_path}'，这是不允许的")
         if (not src_path) or (not dst_path):  # 如果源路径或者目标路径是当前路径；
             raise InvalidCurrentDirOperation(f"在移动操作中，源路径'{dst_path}'或者目标路径'{src_path}'是当前路径，这是不允许的")
-        if (not self.is_path_exists(src_path)) or (not self.is_path_exists(dst_path[:-1])):  # 如果源路径或目标路径不存在；
-            raise PathNotExists(f"在移动操作中，源路径'{dst_path}'或者目标路径'{src_path}'不存在")
+        if (not self.is_path_exists(src_path)) or (not self.is_path_exists(dst_path[:-1])):  # 如果目标路径所在的目录或源路径不存在；
+            raise PathNotExists(f"在移动操作中，源路径'{dst_path}'或者目标路径'{src_path}'所在的目录不存在")
         if not dst_path[-1]:  # 带创建的结点的名称不能是空的；
             raise InvalidNamingConvention("带创建的结点的名称不能是空的")
         if '/' in dst_path[-1]:  # 待创建的结点名称不能包含‘/’；
