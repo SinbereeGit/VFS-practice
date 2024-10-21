@@ -336,7 +336,9 @@ class VirtualFileSystem:
             * 该路径要求满足“列表路径”的条件，否则可能导致错误；
         """
         path = '/'.join(path)  # '/'.join([''])的结果是''，'/'.join(['/'])的结果是'/'，所以对当前路径和根路径都是支持的；
-        return path
+        if path == '/':
+            return path
+        return path.strip('/')
 
     # ·--这个方法应该没什么问题；
     @staticmethod
@@ -617,7 +619,7 @@ class VirtualFileSystem:
                 self.__add_quote_count_for_files_in_dir(path_tmp)
 
     # 后续添加
-    def __copy_dir_from_outside_ex(self, outer_path: str, inner_path: list, filter: list) -> None:
+    def __copy_dir_from_outside_ex(self, outer_path: str, inner_path: list, type_filter: list) -> None:
         """向指定路径以复制的方式添加一个外部目录（包含目录名）, 只添加指定后缀的文件（非覆盖式）；
 
         Warnings:
@@ -659,12 +661,12 @@ class VirtualFileSystem:
         for entry in os.listdir(outer_path):  # 对于既不是目录也不是普通文件的东西，这里直接忽略；
             full_path = os.path.join(outer_path, entry)
             if os.path.isdir(full_path):  # 如果是一个目录，递归调用自己；
-                self.__copy_dir_from_outside_ex(full_path, inner_path + [entry], filter)
+                self.__copy_dir_from_outside_ex(full_path, inner_path + [entry], type_filter)
             elif os.path.isfile(full_path):  # 如果是一个文件，且满足相应的扩展名, 调用self.__copy_file_from_outside进行处理；
-                if (os.path.basename(full_path)).split('.')[-1].lower() in filter:
+                if (os.path.basename(full_path)).split('.')[-1].lower() in type_filter:
                     self.__copy_file_from_outside(full_path, inner_path + [entry])
 
-    def __copy_dir_to_outside_ex(self, inner_path: list, outer_path: str, filter: list) -> None:
+    def __copy_dir_to_outside_ex(self, inner_path: list, outer_path: str, type_filter: list) -> None:
         """向外部指定路径以复制的方式添加内部目录, 只添加指定后缀的文件（非覆盖式）；
 
         Notes:
@@ -703,10 +705,10 @@ class VirtualFileSystem:
         for item in contents:
             path_tmp = inner_path + [item]
             if not self._dir_tree_handler.is_dir(path_tmp):  # 如果是一个文件，且满足指定的后缀, 将它复制到目录中；
-                if path_tmp[-1].split('.')[-1].lower() in filter:
+                if path_tmp[-1].split('.')[-1].lower() in type_filter:
                     self.__copy_file_to_outside(path_tmp, outer_path)
             else:  # 如果是一个目录，递归调用自己；
-                self.__copy_dir_to_outside_ex(path_tmp, os.path.join(outer_path, item), filter)
+                self.__copy_dir_to_outside_ex(path_tmp, os.path.join(outer_path, item), type_filter)
 
     # 提供给外部的方法
     def store_change(self):
@@ -1122,7 +1124,7 @@ class VirtualFileSystem:
             self.copy(src_path, self.__join_two_inner_paths(dst_dir, dst_name))
 
     # 添加功能
-    def copy_dir_from_outside_ex(self, outer_path: str, inner_path: str, filter: list) -> None:
+    def copy_dir_from_outside_ex(self, outer_path: str, inner_path: str, type_filter: list) -> None:
         """向指定路径以复制的方式添加一个外部目录, 只添加指定后缀的文件（非覆盖式）；
 
         Notes:
@@ -1145,9 +1147,9 @@ class VirtualFileSystem:
             raise InvalidOperation("外部路径不能和根目录相关")
 
         inner_path_list = self.__convert_inner_path_to_list_path(inner_path)
-        self.__copy_dir_from_outside_ex(outer_path, inner_path_list, filter)
+        self.__copy_dir_from_outside_ex(outer_path, inner_path_list, type_filter)
 
-    def copy_dir_to_outside_ex(self, inner_path: str, outer_path: str, filter: list) -> None:
+    def copy_dir_to_outside_ex(self, inner_path: str, outer_path: str, type_filter: list) -> None:
         """将指定路径的文件或目录复制到外部的指定路径（非覆盖式）；
 
         Notes:
@@ -1166,7 +1168,7 @@ class VirtualFileSystem:
             其他由外部文件操作引发的异常也可能发生；
         """
         inner_path_list = self.__convert_inner_path_to_list_path(inner_path)
-        self.__copy_dir_to_outside_ex(inner_path_list, outer_path, filter)
+        self.__copy_dir_to_outside_ex(inner_path_list, outer_path, type_filter)
 
 
 if __name__ == "__main__":

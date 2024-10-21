@@ -315,15 +315,16 @@ class DirTreeHandler:
                 self._old_dir_path = old_dir_path_tmp
                 self.__backward()
                 return False
+            else:
+                self._old_dir = old_dir_tmp  # 恢复旧路径；
+                self._old_dir_path = old_dir_path_tmp
 
-        # 恢复旧路径；
-        self._old_dir = old_dir_tmp
-        self._old_dir_path = old_dir_path_tmp
 
         # 判断该路径对应的是目录、文件还是不存在；
         if path[-1] in self._current_dir[NoteIndex.content.value].keys():
             if self._current_dir[NoteIndex.content.value][path[-1]][NoteIndex.is_dir.value]:
                 self._current_dir = self._current_dir[NoteIndex.content.value][path[-1]]
+                self._current_dir_path = self._current_dir_path + [path[-1]]
                 check_result = NoteType.is_dir
             else:
                 check_result = NoteType.is_file
