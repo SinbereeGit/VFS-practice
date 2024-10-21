@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 elif command == 'mv':
                     src_path = input("输入源路径: ")
                     dst_path = input("输入目标路径: ")
-                    vfs.mv(src_path, dst_path)
+                    vfs.move(src_path, dst_path)
                 elif command == 'rm':
                     rm_path = input("输入要删除的路径: ")
                     vfs.delete(rm_path)
