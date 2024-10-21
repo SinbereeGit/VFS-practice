@@ -17,6 +17,7 @@
             ·“外部”的源路径不能和系统文件集目录相关的；
     Warning：
         ·最好使用with来使用该类的对象；
+        - 这里如果引发异常, 可能会出现 用户集 和 引用计数 以及 实体文件集 的不一致 (还没有仔细考虑).
     注：
         ·--模块中几乎所有的“if not”是冗余的，不过现在我们不打算更正它们（因为实在是有点太多了）；
 """
@@ -615,6 +616,98 @@ class VirtualFileSystem:
             else:  # 如果是一个目录，递归调用自己；
                 self.__add_quote_count_for_files_in_dir(path_tmp)
 
+    # 后续添加
+    def __copy_dir_from_outside_ex(self, outer_path: str, inner_path: list, filter: list) -> None:
+        """向指定路径以复制的方式添加一个外部目录（包含目录名）, 只添加指定后缀的文件（非覆盖式）；
+
+        Warnings:
+            * 现在只能处理目录和普通文件，不能处理别的比如链接之类的东西，现在的做法是略过它们；
+
+        Notes:
+            * 如果内部路径存在，则抛出异常；
+
+        Args:
+            outer_path: 外部路径；
+            inner_path: 列表路径；
+
+        Raises:
+            FileNotFoundError: 如果外部路径不存在；
+            NotADirectoryError: 如果外部路径存在但不对应一个目录；
+            InvalidOperation: 如果外部路径包含根路径；
+            InvalidCurrentDirOperation: 如果列表路径是当前路径；
+            DirOfPathNotExists: 如果列表路径所在的目录不存在；
+            PathExists: 如果内部路径已经存在；
+            其他由外部文件操作引发的异常也可能发生；
+        """
+        # 条件检查；
+        if not os.path.exists(outer_path):
+            raise FileNotFoundError(f"外部路径'{outer_path}'不存在")
+        if not os.path.isdir(outer_path):
+            raise NotADirectoryError(f"外部路径'{outer_path}'存在但不对应一个目录")
+        if self.__is_outer_path_contained(outer_path, self._root_dir):
+            raise InvalidOperation(f"不允许将外部路径包含根路径")
+        if not inner_path:
+            raise InvalidCurrentDirOperation(f"该列表路径不能是当前路径")
+        if not self._dir_tree_handler.is_path_exists(inner_path[:-1]):
+            raise DirOfPathNotExists(f"列表路径'{inner_path}'所在的目录不存在")
+        if self._dir_tree_handler.is_path_exists(inner_path):  # 如果目标路径是存在的；
+            raise PathExists(f"路径'{inner_path}'已经存在，不能覆盖它")
+
+        # 创建一个目录结点；
+        self._dir_tree_handler.mkdir(inner_path)
+        # 遍历目录中的内容；
+        for entry in os.listdir(outer_path):  # 对于既不是目录也不是普通文件的东西，这里直接忽略；
+            full_path = os.path.join(outer_path, entry)
+            if os.path.isdir(full_path):  # 如果是一个目录，递归调用自己；
+                self.__copy_dir_from_outside_ex(full_path, inner_path + [entry], filter)
+            elif os.path.isfile(full_path):  # 如果是一个文件，且满足相应的扩展名, 调用self.__copy_file_from_outside进行处理；
+                if (os.path.basename(full_path)).split('.')[-1].lower() in filter:
+                    self.__copy_file_from_outside(full_path, inner_path + [entry])
+
+    def __copy_dir_to_outside_ex(self, inner_path: list, outer_path: str, filter: list) -> None:
+        """向外部指定路径以复制的方式添加内部目录, 只添加指定后缀的文件（非覆盖式）；
+
+        Notes:
+            * 如果这个内部目录中有文件没有file_id，是会抛出异常的；
+
+        Args:
+            inner_path: 列表路径；
+            outer_path: 外部路径；
+
+        Raises:
+            PathNotExists: 如果列表路径不存在；
+            PathIsNotDir: 如果列表路径存在但不对应一个目录；
+            InvalidOperation: 如果外部路径包含根路径；
+            FileNotFoundError: 如果外部路径所在的目录不存在；
+            FileExistsError: 如果外部路径存在；
+            FileIDNotFound: 如果这个目录中存在一个文件没有file_id；
+            其他由外部文件操作引发的异常也可能发生；
+        """
+        # 条件检查；
+        if not self._dir_tree_handler.is_path_exists(inner_path):
+            raise PathNotExists(f"列表路径'{inner_path}'不存在")
+        if not self._dir_tree_handler.is_dir(inner_path):
+            raise PathIsNotDir(f"列表路径'{inner_path}'存在但不对应一个目录")
+        if self.__is_outer_path_contained(outer_path, self._root_dir):
+            raise InvalidOperation(f"不允许将外部路径包含根路径")
+        if os.path.exists(os.path.dirname(outer_path)):
+            raise FileNotFoundError(f"外部路径'{outer_path}'所在的目录不存在")
+        if os.path.exists(outer_path):  # 如果外部路径存在；
+            raise FileExistsError(f"外部路径'{outer_path}'已经存在，不能覆盖它")
+
+        # 创建一个目录
+        os.mkdir(outer_path)
+        # 获得目录的内容；
+        contents = self._dir_tree_handler.get_dir_content(inner_path)
+        # 遍历目录；
+        for item in contents:
+            path_tmp = inner_path + [item]
+            if not self._dir_tree_handler.is_dir(path_tmp):  # 如果是一个文件，且满足指定的后缀, 将它复制到目录中；
+                if path_tmp[-1].split('.')[-1].lower() in filter:
+                    self.__copy_file_to_outside(path_tmp, outer_path)
+            else:  # 如果是一个目录，递归调用自己；
+                self.__copy_dir_to_outside_ex(path_tmp, os.path.join(outer_path, item), filter)
+
     # 提供给外部的方法
     def store_change(self):
         """在退出前将对目录树的操作、引用计数操作保存；
@@ -1027,6 +1120,53 @@ class VirtualFileSystem:
             self.copy(src_path, self.__join_two_inner_paths(dst_dir, os.path.basename(src_path)))
         else:
             self.copy(src_path, self.__join_two_inner_paths(dst_dir, dst_name))
+
+    # 添加功能
+    def copy_dir_from_outside_ex(self, outer_path: str, inner_path: str, filter: list) -> None:
+        """向指定路径以复制的方式添加一个外部目录, 只添加指定后缀的文件（非覆盖式）；
+
+        Notes:
+            * 在使用前应检查内部路径是否存在；
+            * 如果内部路径存在，则抛出异常；
+
+        Raises:
+            InvalidPath: 如果内部路径是非法的；
+            InvalidOperation: 如果外部路径包含根目录；
+            FileNotFoundError: 如果外部路径不存在；
+            NotADirectoryError: 如果外部路径存在不对应一个目录.
+            InvalidOperation: 如果外部路径包含根路径；
+            InvalidCurrentDirOperation: 如果内部路径是当前路径；
+            DirOfPathNotExists: 如果内部路径所在的目录不存在；
+            PathExists: 如果内部路径已经存在；
+            其他由外部文件操作引发的异常也可能发生；
+        """
+        # 条件检查；
+        if self.__is_outer_path_contained(outer_path, self._root_dir):  # 检查外部路径中是否包含根目录；
+            raise InvalidOperation("外部路径不能和根目录相关")
+
+        inner_path_list = self.__convert_inner_path_to_list_path(inner_path)
+        self.__copy_dir_from_outside_ex(outer_path, inner_path_list, filter)
+
+    def copy_dir_to_outside_ex(self, inner_path: str, outer_path: str, filter: list) -> None:
+        """将指定路径的文件或目录复制到外部的指定路径（非覆盖式）；
+
+        Notes:
+            * 在使用前应当检查外部路径是否存在；
+            * 如果外部路径存在，则抛出异常；
+
+        Raises:
+            InvalidPath: 如果内部路径是非法的；
+            PathNotExists: 如果内部路径不存在；
+            PathIsNotDir: 如果内部路径存在但不对应一个目录.
+            PathIsNotDir: 如果外部路径存在不对应一个目录.
+            InvalidOperation: 如果外部路径包含根路径；
+            FileNotFoundError: 如果外部路径所在的目录不存在；
+            FileExistsError: 如果外部路径存在；
+            FileIDNotFound: 如果内部路径存在而且对应一个文件但这个文件却没有file_id；
+            其他由外部文件操作引发的异常也可能发生；
+        """
+        inner_path_list = self.__convert_inner_path_to_list_path(inner_path)
+        self.__copy_dir_to_outside_ex(inner_path_list, outer_path, filter)
 
 
 if __name__ == "__main__":
