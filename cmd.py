@@ -61,7 +61,7 @@ if __name__ == "__main__":
                     dst_path = input("输入内部路径: ")
                     type_filter = (input("输入类型列表(用 ',' 分隔): ")).split(',')
                     vfs.copy_dir_from_outside_ex(src_path, dst_path, type_filter)
-                elif command == 'cp_to_outside':
+                elif command == 'cp_to_outside_ex':
                     src_path = input("输入内部路径: ")
                     dst_path = input("输入外部路径: ")
                     type_filter = (input("输入类型列表(用 ',' 分隔): ")).split(',')
