@@ -670,6 +670,8 @@ class DirTreeHandler:
         if '/' in dst_path[-1]:  # 待创建的结点名称不能包含‘/’；
             raise InvalidNamingConvention("待创建结点的名称中不能包含’/‘")
 
+        # 保存原来的状态
+        state = self.__get_state()
         # 获取格式化的当前时间；
         current_time = self.__get_current_time()
         # 获取源结点；
@@ -685,7 +687,9 @@ class DirTreeHandler:
             self.__update_child_last_modified_time_recursively([dst_path[-1]])
         else:
             note_tmp[NoteIndex.metadata.value][MetadataIndex.last_modify_time.value] = current_time
-        self.__backward()
+        # self.__backward()
+        # 恢复原来的状态
+        self.__set_state(state)
 
     def copy(self, src_path: list, dst_path: list) -> None:
         """复制一个文件或目录（复制是覆盖式的）；
@@ -711,6 +715,9 @@ class DirTreeHandler:
             raise InvalidNamingConvention("带创建的结点的名称不能是空的")
         if '/' in dst_path[-1]:  # 待创建的结点名称不能包含‘/’；
             raise InvalidNamingConvention("待创建结点的名称中不能包含’/‘")
+
+        # 保存原来的状态
+        state = self.__get_state()
         # 获取格式化的当前时间；
         current_time = self.__get_current_time()
         # 获取源结点；
@@ -725,7 +732,9 @@ class DirTreeHandler:
             self.__update_child_last_modified_time_recursively([dst_path[-1]])
         else:
             note_tmp[NoteIndex.metadata.value][MetadataIndex.last_modify_time.value] = current_time
-        self.__backward()
+        # self.__backward()
+        # 恢复原来的状态
+        self.__set_state(state)
 
     def delete(self, path: list) -> None:
         """删除一个文件或目录；
