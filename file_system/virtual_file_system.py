@@ -335,10 +335,10 @@ class VirtualFileSystem:
         Warnings:
             * 该路径要求满足“列表路径”的条件，否则可能导致错误；
         """
-        if not path:  # 如果是当前路径直接返回''
+        if not path:  # 如果是当前路径直接返回 ''
             return ''
         if path[0] == '/':  # 绝对路径
-            return '/'.join(path[1:])
+            return '/' + '/'.join(path[1:])
         else:  # 相对路径
             return '/'.join(path)
 
