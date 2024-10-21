@@ -518,7 +518,7 @@ class VirtualFileSystem:
             raise PathIsNotFile(f"列表路径'{inner_path}'存在但不对应一个文件")
         if self.__is_outer_path_contained(outer_path, self._root_dir):
             raise InvalidOperation(f"不允许将外部路径包含根路径")
-        if os.path.exists(os.path.dirname(outer_path)):
+        if not os.path.exists(os.path.dirname(outer_path)):
             raise FileNotFoundError(f"外部路径'{outer_path}'所在的目录不存在")
         if os.path.exists(outer_path):  # 如果外部路径存在；
             raise FileExistsError(f"外部路径'{outer_path}'已经存在，不能覆盖它")
@@ -554,7 +554,7 @@ class VirtualFileSystem:
             raise PathIsNotDir(f"列表路径'{inner_path}'存在但不对应一个目录")
         if self.__is_outer_path_contained(outer_path, self._root_dir):
             raise InvalidOperation(f"不允许将外部路径包含根路径")
-        if os.path.exists(os.path.dirname(outer_path)):
+        if not os.path.exists(os.path.dirname(outer_path)):
             raise FileNotFoundError(f"外部路径'{outer_path}'所在的目录不存在")
         if os.path.exists(outer_path):  # 如果外部路径存在；
             raise FileExistsError(f"外部路径'{outer_path}'已经存在，不能覆盖它")
@@ -579,9 +579,9 @@ class VirtualFileSystem:
             PathIsNotDir: 如果该列表路径存在但不对应一个目录；
         """
         # 条件检查；
-        if self._dir_tree_handler.is_path_exists(dir_path):
+        if not self._dir_tree_handler.is_path_exists(dir_path):
             raise PathNotExists(f"列表路径'{dir_path}'不存在")
-        if self._dir_tree_handler.is_dir(dir_path):
+        if not self._dir_tree_handler.is_dir(dir_path):
             raise PathIsNotDir(f"列表路径'{dir_path}'存在但不对应一个目录")
 
         # 获得目录的内容
@@ -603,9 +603,9 @@ class VirtualFileSystem:
             PathIsNotDir: 如果该列表路径存在但不对应一个目录；
         """
         # 条件检查；
-        if self._dir_tree_handler.is_path_exists(dir_path):
+        if not self._dir_tree_handler.is_path_exists(dir_path):
             raise PathNotExists(f"列表路径'{dir_path}'不存在")
-        if self._dir_tree_handler.is_dir(dir_path):
+        if not self._dir_tree_handler.is_dir(dir_path):
             raise PathIsNotDir(f"列表路径'{dir_path}'存在但不对应一个目录")
 
         # 获得目录的内容；
@@ -694,7 +694,7 @@ class VirtualFileSystem:
             raise PathIsNotDir(f"列表路径'{inner_path}'存在但不对应一个目录")
         if self.__is_outer_path_contained(outer_path, self._root_dir):
             raise InvalidOperation(f"不允许将外部路径包含根路径")
-        if os.path.exists(os.path.dirname(outer_path)):
+        if not os.path.exists(os.path.dirname(outer_path)):
             raise FileNotFoundError(f"外部路径'{outer_path}'所在的目录不存在")
         if os.path.exists(outer_path):  # 如果外部路径存在；
             raise FileExistsError(f"外部路径'{outer_path}'已经存在，不能覆盖它")
