@@ -11,7 +11,7 @@ if __name__ == "__main__":
     with VirtualFileSystem(root_dir, user_id) as vfs:
         # 用户交互一下吧.
         # 设置命令集合
-        command_set = ['q!', 'pwd', 'cd', 'ls', 'cp', 'mv', 'rm', 'cp_from_outside', 'cp_to_outside', 'cp_from_outside_ex', 'cp_to_outside_ex']
+        command_set = ['q!', 'pwd', 'cd', 'ls', 'mkdir', 'cp', 'mv', 'rm', 'cp_from_outside', 'cp_to_outside', 'cp_from_outside_ex', 'cp_to_outside_ex']
         print(f"支持的命令: {command_set}")
         while True:
             try:
@@ -34,6 +34,9 @@ if __name__ == "__main__":
                     print(f'当前目录: {vfs.get_current_dir_path()}')
                 elif command == 'ls':
                     print(f"{vfs.get_dir_content('')}")
+                elif command == 'mkdir':
+                    dir_path = input("输入你要创建的目录路径: ")
+                    vfs.mkdir(dir_path)
                 elif command == 'cp':
                     src_path = input("输入源路径: ")
                     dst_path = input("输入目标路径: ")
