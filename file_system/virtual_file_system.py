@@ -957,17 +957,20 @@ class VirtualFileSystem:
             InvalidCurrentDirOperation: 如果该路径是当前路径；
             PathNotExists: 如果该路径不存在；
         """
+        # 条件检查
+        if path == '':  # 如果该路径是当前路径
+            raise InvalidCurrentDirOperation(f"在删除操作中，待删除路径是当前路径，这是不允许的")
+
         path_list = self.__convert_inner_path_to_list_path(path)
-        # 删除结点（必须放在处理引用计数前面，因为要使用其中的异常处理）；
-        type_tmp = self._dir_tree_handler.is_dir(path_list)  # 先保存待删除结点的要用到的信息
-        file_id = self._dir_tree_handler.get_file_hash(path_list)
-        self._dir_tree_handler.delete(path_list)
         # 处理文件引用计数；
-        if not type_tmp:  # 如果是一个文件，减少其引用计数（当减为 0 时，将这个实体文件删除）；
+        if not self._dir_tree_handler.is_dir(path_list):  # 如果是一个文件，减少其引用计数（当减为 0 时，将这个实体文件删除）；
+            file_id = self._dir_tree_handler.get_file_hash(path_list)
             if self._file_quote_count_manager.sub_quote_count_for_id(file_id):
                 os.remove(os.path.join(self._entity_files_dir, file_id))
         else:  # 如果是一个目录，递归减少引用计数；
             self.__sub_quote_count_for_files_in_dir(path_list)
+        # 删除结点
+        self._dir_tree_handler.delete(path_list)
 
     def mkdir(self, path: str) -> None:
         """在内部新建一个目录（非覆盖式）；
