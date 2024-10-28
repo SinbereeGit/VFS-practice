@@ -250,12 +250,15 @@ class VirtualFileSystem:
 
         Warnings:
             * 在最初使用的时候使用一个空目录，对系统文件集目录的任何操作必须都是通过本模块完成的，否则可能导致意想不到的错误；
+            * 这里没有检查用户名的合法性, 应当输入合乎文件名规范的用户名, 否则可能导致意想不到的问题.
 
         Args:
             root_dir: 指定根目录，如果不存在会创建；
             user_id: 指定使用的用户ID，如果不存在会创建；
             json_indent_zero: 设置保存的json文件的indent，True表示紧凑，False表示indent为4；
             json_sep_close: 设置保存的json文件的分隔符的紧凑程度，True表示紧凑，False表示有一个空格；
+        Raises:
+
         """
         self._root_dir = root_dir
         self._entity_files_dir = os.path.join(root_dir, ENTITY_FILES_DIR_NAME)
@@ -618,7 +621,7 @@ class VirtualFileSystem:
                 if self._file_quote_count_manager.sub_quote_count_for_id(file_id):
                     os.remove(os.path.join(self._entity_files_dir, file_id))
             else:  # 如果是一个目录，递归调用自己；
-                self.__add_quote_count_for_files_in_dir(path_tmp)
+                self.__sub_quote_count_for_files_in_dir(path_tmp)
 
     # 后续添加
     def __copy_dir_from_outside_ex(self, outer_path: str, inner_path: list, type_filter: list) -> None:
