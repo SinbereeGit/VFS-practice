@@ -7,7 +7,7 @@ from ..virtual_file_system import VirtualFileSystem
 
 # 设置命令集合
 COMMAND_SET = ('q!', 'pwd', 'cd', 'ls', 'mkdir', 'cp', 'mv', 'rm',
-               'cp_from_outside', 'cp_to_outside', 'cp_from_outside_ex', 'cp_to_outside_ex')
+               'cp_from_outside', 'cp_to_outside', 'cp_from_outside_ex', 'cp_to_outside_ex', 'diff')
 
 
 def run():
@@ -69,5 +69,10 @@ def run():
                     dst_path = input("输入外部路径: ")
                     type_filter = (input("输入类型列表(用 ',' 分隔): ")).split(',')
                     vfs.copy_dir_to_outside_ex(src_path, dst_path, type_filter)
+                elif command == 'diff':
+                    base_path = input("输入作为基准比对目录的内部路径: ")
+                    patch_patch = input("输入作为比对目录的内部路径: ")
+                    diff_results = vfs.compare_two_dir(base_path, patch_patch)
+                    print(diff_results)
             except Exception as e:
                 print(f"Oops! 粗错啦: {e}")

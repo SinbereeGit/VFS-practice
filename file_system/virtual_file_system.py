@@ -1166,7 +1166,6 @@ class VirtualFileSystem:
             InvalidPath: 如果内部路径是非法的；
             PathNotExists: 如果内部路径不存在；
             PathIsNotDir: 如果内部路径存在但不对应一个目录.
-            PathIsNotDir: 如果外部路径存在不对应一个目录.
             InvalidOperation: 如果外部路径包含根路径；
             FileNotFoundError: 如果外部路径所在的目录不存在；
             FileExistsError: 如果外部路径存在；
@@ -1176,6 +1175,89 @@ class VirtualFileSystem:
         inner_path_list = self.__convert_inner_path_to_list_path(inner_path)
         self.__copy_dir_to_outside_ex(inner_path_list, outer_path, type_filter)
 
+    def compare_two_dir(self, base_dir_path: str, patch_dir_path: str) -> str:
+        """比较两个目录的内容.
+
+        以补丁的形式输出 patch_dir_path 相对于 base_dir_path 的内容 (特别地, 如果没有差别, 输出为空)
+
+        Warnings:
+                - 这里暂且没去管这种情况: 如果这个目录中有文件是没有 file_id 对应的.
+
+        Args:
+            base_dir_path: 作为基准的目录
+            patch_dir_path: 和基准目录作比较的目录
+
+        Returns:
+            以 补丁 的形式输出 patch_dir_path 相对于 base_dir_path 的差异内容
+
+        Raises:
+            PathNotExists: 如果其中有一个路径不存在；
+            PathIsNotDir: 如果其中有一个路径存在但不对应一个目录.
+        """
+        def get_files_in_dir(dir_path: str) -> dict:
+            """获得指定目录中的所有文件信息
+
+            Warnings:
+                - 这里暂且没去管这种情况: 如果这个目录中有文件是没有 file_id 对应的.
+
+            Returns:
+                返回的是一个字典, 字典中的元素的 key 是相对与这个 dir_path 的相对路径, value 是这个文件的 file_id (也就是 hash 值).
+
+            Raises:
+                PathNotExists: 如果路径不存在；
+                PathIsNotDir: 如果路径存在但不对应一个目录.
+            """
+            def add_file_info_in_dir(dir_path: str, current_relative_path: str) -> None:
+                """将该目录中的文件信息添加到 files_dict 中
+
+                Notes:
+                    - 这里的 current_relative_path 是指想要加上的相对路径前缀名, 然后这个目录中的文件的文件路径就是 这个前缀名 + 文件名.
+                """
+                # 保存一下当前的路径
+                current_dir_path = self.get_current_dir_path()
+
+                try:
+                    self.chdir(dir_path)
+                    # 遍历
+                    for item in self.get_dir_content(self.get_current_dir_path()):
+                        if self._dir_tree_handler.is_dir([item]):  # 如果是目录, 递归调用自己
+                            add_file_info_in_dir(item, self.__join_two_inner_paths(current_relative_path, item))
+                        else:  # 如果是文件, 将相应的文件信息填入到文件信息字典中
+                            files_dict[self.__join_two_inner_paths(current_relative_path, item)] = self._dir_tree_handler.get_file_hash([item])
+                finally:
+                    # 恢复调用前的当前目录
+                    self.chdir(current_dir_path)
+
+            files_dict = {}  # 待返回的文件信息字典
+            add_file_info_in_dir(dir_path, "")  # 将该目录的文件信息加入到 files_dict 中
+            return files_dict
+
+        # 思路是这样的:
+        # 要不我们粗暴一点?
+        # 我们将分别遍历这两个目录, 然后输出相对于这个目录的所有文件路径和相应的 hash 值, 即 { relative_file_path : hash, ... },
+        # 然后以补丁形式输出差别就行啦!
+
+        # 获得文件信息字典
+        base_dict = get_files_in_dir(base_dir_path)
+        patch_dict = get_files_in_dir(patch_dir_path)
+
+        diff_str = ""
+        # 找出在 base_dict 中存在但在 patch_dict 中不存在的键值对
+        for key in base_dict:
+            if key not in patch_dict:
+                diff_str += '-' + key + '\n'
+            elif base_dict[key] != patch_dict[key]:
+                diff_str += '-' + key + '\n'
+
+        # 找出在 patch_dict 中存在但在 base_dict 中不存在的键值对
+        for key in patch_dict:
+            if key not in base_dict:
+                diff_str += '-' + key + '\n'
+            elif patch_dict[key] != base_dict[key]:
+                diff_str += '-' + key + '\n'
+
+        return diff_str
+
 
 if __name__ == "__main__":
     """以简单地导入外部目录为例；"""
@@ -1183,6 +1265,7 @@ if __name__ == "__main__":
     # 注：如果要测试，请拷贝下面的代码，在外部的 python 文件中使用；
 
     root_dir = "VSF_sinber"
+
     with VirtualFileSystem(root_dir, "sinber") as vfs:
         path = "file_system_"
         if vfs.is_path_exists(path):
