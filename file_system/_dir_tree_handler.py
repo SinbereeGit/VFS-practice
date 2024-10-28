@@ -423,7 +423,7 @@ class DirTreeHandler:
             # 递归地修改子结点的最后修改时间
             for name, item in current_dir[NoteIndex.content.value].items():
                 if item[NoteIndex.is_dir.value]:  # 如果是一个目录，递归调用自己
-                    update_child_last_modified_time_recursively_help(path + [name])
+                    update_child_last_modified_time_recursively_help([name])
                 else:  # 否则，直接修改该文件的最后修改时间
                     item[NoteIndex.metadata.value][MetadataIndex.last_modify_time.value] = current_time
 
