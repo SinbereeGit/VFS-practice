@@ -1255,9 +1255,9 @@ class VirtualFileSystem:
         # 找出在 patch_dict 中存在但在 base_dict 中不存在的键值对
         for key in patch_dict:
             if key not in base_dict:
-                diff_str += '-' + key + '\n'
+                diff_str += '+' + key + '\n'
             elif patch_dict[key] != base_dict[key]:
-                diff_str += '-' + key + '\n'
+                diff_str += '+' + key + '\n'
 
         return diff_str
 
