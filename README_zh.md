@@ -88,7 +88,7 @@ finally:
 
 提供主要的 `VirtualFileSystem` 类，具有各种文件系统操作。
 
-### `dir_tree_handler.py`
+### `_dir_tree_handler.py`
 
 处理由此模块创建的对应于 JSON 文件的目录树。
 
@@ -96,15 +96,15 @@ finally:
 
 定义文件系统中使用的各种异常。
 
-### `count_manager.py`
+### `_utils/count_manager.py`
 
 维护指定标识符的计数，支持创建和增减操作。
 
-### `file_hash.py`
+### `_utils/file_hash.py`
 
 使用 SHA-256 算法生成文件的哈希值。
 
-### `simple_ui.py`
+### `tools/simple_ui.py`
 
 提供用于使用文件系统的简单命令行界面。
 
