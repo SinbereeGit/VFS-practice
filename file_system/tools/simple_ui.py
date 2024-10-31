@@ -1,7 +1,9 @@
-"""提供简单的使用文件系统的命令行 ui"""
+"""提供简单的使用文件系统的 *命令行* ui"""
 
 # 标准库模块
-# 第三方库模块
+
+# 第三方库模块 (无)
+
 # 自定义模块
 from ..virtual_file_system import VirtualFileSystem
 
@@ -9,9 +11,8 @@ from ..virtual_file_system import VirtualFileSystem
 COMMAND_SET = ('q!', 'pwd', 'cd', 'ls', 'mkdir', 'cp', 'mv', 'rm',
                'cp_from_outside', 'cp_to_outside', 'cp_from_outside_ex', 'cp_to_outside_ex', 'diff')
 
-
 def run():
-    # 使用推荐的with（上下文资源管理器）.
+    """运行简单的文件系统 *命令行* ui"""
     root_dir = input("输入该系统的根目录: ")
     user_id = input("输入你的用户名: ")
     with VirtualFileSystem(root_dir, user_id) as vfs:
