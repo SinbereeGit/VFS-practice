@@ -11,7 +11,7 @@
 
 **English** · [简体中文](./README_zh.md)
 
-This project provides a virtual file system that supports *serial multi-user* and *deduplication storage*. It is uniquely determined by a (special file set directory, specified user ID).
+This project provides a virtual file system that supports *serial multi-user* and *deduplication storage*. It is uniquely determined by a (system root directory, specified user ID).
 
 </div>
 
