@@ -90,7 +90,7 @@ finally:
 
 Provides the main `VirtualFileSystem` class with various file system operations.
 
-### `dir_tree_handler.py`
+### `_dir_tree_handler.py`
 
 Handles directory trees corresponding to JSON files created by this module.
 
@@ -98,15 +98,15 @@ Handles directory trees corresponding to JSON files created by this module.
 
 Defines various exceptions used in the file system.
 
-### `count_manager.py`
+### `_utils/count_manager.py`
 
 Maintains counts for specified identifiers, supporting creation and increment/decrement operations.
 
-### `file_hash.py`
+### `_utils/file_hash.py`
 
 Generates hash values for files using the SHA-256 algorithm.
 
-### `simple_ui.py`
+### `tools/simple_ui.py`
 
 Provides a simple command-line UI for using the file system.
 
