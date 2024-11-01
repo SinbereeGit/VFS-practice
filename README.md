@@ -21,6 +21,20 @@ This project provides a virtual file system that supports *serial multi-user* an
 - **Deduplication Storage**: Ensures that duplicate files are stored only once.
 - **Virtual File System**: Provides a virtual file system with various operations.
 
+## Installing & Dependencies
+
+This is an independent package without any outside dependency, which means you can use it directly.
+
+Download the package and use it with our simple wrapper:
+
+```python
+from file_system.tools import simple_ui
+
+simple_ui.run()
+```
+
+This is a fast way to know some functions of this VFS.
+
 ## Usage
 
 ### Example
@@ -51,6 +65,8 @@ except Exception as e:
 finally:
     vfs.store_change()
 ```
+
+More details refer to the docstrings in [virtual_file_system](file_system/virtual_file_system.py).
 
 ## Warnings
 
