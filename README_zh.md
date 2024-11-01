@@ -19,6 +19,20 @@
 - **去重存储**：确保重复文件只存储一次。
 - **虚拟文件系统**：提供具有各种操作的虚拟文件系统。
 
+## 安装 & 依赖
+
+这是一个无外部依赖的独立包，这意味着你可以直接使用它。
+
+下载该包，通过我们的简单的包装使用它：
+
+```python
+from file_system.tools import simple_ui
+
+simple_ui.run()
+```
+
+这是一个很快了解这个 VFS 的一些功能的方法。
+
 ## 用法
 
 ### 示例
@@ -49,6 +63,8 @@ except Exception as e:
 finally:
     vfs.store_change()
 ```
+
+更多的细节请参考 [virtual_file_system](file_system/virtual_file_system.py) 中的文档字符串。
 
 ## 警告
 
