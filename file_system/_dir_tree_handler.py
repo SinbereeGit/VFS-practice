@@ -454,9 +454,15 @@ class DirTreeHandler:
 
     def is_path_exists(self, path: list) -> bool:
         """查询指定路径的文件或目录是否存在."""
+        # 保存原来的状态.
+        state = self.__get_state()
+
         if not self.__goto_path(path):
             return False
-        self.__backward()
+        #self.__backward()
+        
+        # 恢复原来的状态
+        self.__set_state(state)
         return True
 
     def chdir(self, dir_path: list) -> None:
