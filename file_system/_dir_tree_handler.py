@@ -460,7 +460,7 @@ class DirTreeHandler:
         if not self.__goto_path(path):
             return False
         #self.__backward()
-        
+
         # 恢复原来的状态
         self.__set_state(state)
         return True
@@ -609,11 +609,11 @@ class DirTreeHandler:
         if self.__is_path_contained(dst_path, src_path):  # 如果目标路径包含源路径;
             raise InvalidOperation(f"在移动操作中, 目标路径'{dst_path}'包含源路径'{src_path}', 这是不允许的")
         if self.__is_path_contained([], src_path):  # 如果当前路径包含源路径.
-            raise InvalidCurrentDirOperation(f"在移动操作中, 当前路径包含源路径'{dst_path}', 这是不允许的")
+            raise InvalidCurrentDirOperation(f"在移动操作中, 当前路径包含源路径'{src_path}', 这是不允许的")
         if (not src_path) or (not dst_path):  # 如果源路径或者目标路径是当前路径.
-            raise InvalidCurrentDirOperation(f"在移动操作中, 源路径'{dst_path}'或者目标路径'{src_path}'是当前路径, 这是不允许的")
+            raise InvalidCurrentDirOperation(f"在移动操作中, 源路径'{src_path}'或者目标路径'{dst_path}'是当前路径, 这是不允许的")
         if (not self.is_path_exists(src_path)) or (not self.is_path_exists(dst_path[:-1])):  # 如果目标路径所在的目录或源路径不存在.
-            raise PathNotExists(f"在移动操作中, 源路径'{dst_path}'或者目标路径'{src_path}'所在的目录不存在")
+            raise PathNotExists(f"在移动操作中, 源路径'{src_path}'或者目标路径'{dst_path}'所在的目录不存在")
         if not dst_path[-1]:  # 带创建的结点的名称不能是空的.
             raise InvalidNamingConvention("带创建的结点的名称不能是空的")
         if '/' in dst_path[-1]:  # 待创建的结点名称不能包含'/'.
@@ -657,9 +657,9 @@ class DirTreeHandler:
         if self.__is_path_contained(dst_path, src_path):  # 如果目标路径包含源路径.
             raise InvalidOperation(f"在移动操作中, 目标路径'{dst_path}'包含源路径'{src_path}', 这是不允许的")
         if (not src_path) or (not dst_path):  # 如果源路径或者目标路径是当前路径.
-            raise InvalidCurrentDirOperation(f"在移动操作中, 源路径'{dst_path}'或者目标路径'{src_path}'是当前路径, 这是不允许的")
+            raise InvalidCurrentDirOperation(f"在移动操作中, 源路径'{src_path}'或者目标路径'{dst_path}'是当前路径, 这是不允许的")
         if (not self.is_path_exists(src_path)) or (not self.is_path_exists(dst_path[:-1])):  # 如果源路径或目标路径不存在.
-            raise PathNotExists(f"在移动操作中, 源路径'{dst_path}'或者目标路径'{src_path}'不存在")
+            raise PathNotExists(f"在移动操作中, 源路径'{src_path}'或者目标路径'{dst_path}'不存在")
         if not dst_path[-1]:  # 带创建的结点的名称不能是空的.
             raise InvalidNamingConvention("带创建的结点的名称不能是空的")
         if '/' in dst_path[-1]:  # 待创建的结点名称不能包含'/'.
